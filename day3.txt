@@ -1,0 +1,158 @@
+pom.xml
+---------
+  <dependency>
+<groupId>org.springframework</groupId>
+<artifactId>spring-context</artifactId>
+<version>4.1.6.RELEASE</version>
+</dependency>
+<dependency>
+<groupId>org.springframework</groupId>
+<artifactId>spring-core</artifactId>
+<version>4.1.6.RELEASE</version>
+</dependency>
+<dependency>
+<groupId>org.springframework</groupId>
+<artifactId>spring-webmvc</artifactId>
+<version>4.1.6.RELEASE</version>
+</dependency>
+<dependency>
+<groupId>org.springframework</groupId>
+<artifactId>spring-web</artifactId>
+<version>4.1.6.RELEASE</version>
+</dependency>
+
+
+web.xml
+--------
+
+<?xml version="1.0" encoding="UTF-8"?>
+
+
+<web-app version="2.5"
+xmlns="http://java.sun.com/xml/ns/javaee"
+mlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
+
+
+ <display-name>Archetype Created Web Application</display-name>
+<listener>
+        <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+    </listener>
+  
+<context-param>
+        <param-name>contextConfigLocation</param-name>
+        <param-value>/WEB-INF/wednessday-servlet.xml</param-value>
+    </context-param>
+     
+   <servlet>
+        <servlet-name>wednessday</servlet-name>
+        <servlet-class>
+            org.springframework.web.servlet.DispatcherServlet
+        </servlet-class>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>wednessday</servlet-name>
+                <url-pattern>/</url-pattern>
+           
+    </servlet-mapping>
+
+</web-app>
+
+
+wednessday-servlet.xml
+---------------------
+
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+        http://www.springframework.org/schema/beans     
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/mvc 
+        http://www.springframework.org/schema/mvc/spring-mvc.xsd
+        http://www.springframework.org/schema/context 
+        http://www.springframework.org/schema/context/spring-context.xsd">
+ 
+	<context:component-scan base-package="com.wednessday" />
+ 
+	<bean id="viewResolver"
+		class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		 <property name="prefix" value="/WEB-INF/views/" />
+		<property name="suffix" value=".jsp" />
+	</bean>
+
+ <mvc:annotation-driven/>
+
+  
+   
+</beans>
+
+
+src->main->java
+---------------
+
+package com.wednessday;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+@Controller
+public class TestController {
+	@RequestMapping("/")
+	public ModelAndView show()
+	{
+		System.out.println("Inside index");
+		return new ModelAndView("index");
+	}
+	@RequestMapping("/apple")
+	public ModelAndView showrd()
+	{
+		System.out.println("Inside rd");
+		return new ModelAndView("rd");
+	}
+
+}
+
+
+
+WEB-INF->views -> 
+
+index.jsp
+---------
+
+<html>
+<body>
+<h2>Hello World!</h2>
+<a href="apple" >Click Here</a>
+</body>
+</html>
+
+
+rd.jsp
+------
+
+<%@ page language="java" contentType="text/html; charset=ISO-8859-1"
+    pageEncoding="ISO-8859-1"%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Insert title here</title>
+</head>
+<body>
+Landing page
+</body>
+</html>
+
+
+Project ->build path -> lib->set for 
+----------------------------
+jdk
+maven
+jre
+Apache Tomact
+
