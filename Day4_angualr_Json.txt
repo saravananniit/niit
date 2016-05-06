@@ -1,0 +1,265 @@
+Angular Js
+-----------
+step 1:
+
+src-main-webapp
+  ->js->angular.min.js
+
+
+index.jsp
+---------
+<!DOCTYPE html>
+<html>
+<style>
+table, th , td  {
+  border: 1px solid grey;
+  border-collapse: collapse;
+  padding: 5px;
+}
+table tr:nth-child(odd)	{
+  background-color: #f1f1f1;
+}
+table tr:nth-child(even) {
+  background-color: #ffffff;
+}
+</style>
+<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
+<body>
+
+<div ng-app="myApp" ng-controller="customersCtrl"> 
+
+<table>
+  <tr ng-repeat="x in names">
+    <td>{{ $index + 1 }}</td>
+    <td>{{ x.Name }}</td>
+    <td>{{ x.Country }}</td>
+  </tr>
+</table>
+
+</div>
+
+<script>
+var app = angular.module('myApp', []);
+app.controller('customersCtrl', function($scope, $http) {
+    $http.get("http://www.w3schools.com/angular/customers.php")
+    .then(function (response) {$scope.names = response.data.records;});
+});
+</script>
+
+<a href="example1.jsp">example1</a>
+
+
+
+<a href="example2.jsp">example2</a>
+
+</body>
+</html>
+
+example1.jsp
+------------
+
+<!DOCTYPE html>
+<html>
+<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
+<link rel="stylesheet" href="http://www.w3schools.com/lib/w3.css">
+<body>
+
+<script>
+var app = angular.module("myShoppingList", []); 
+app.controller("myCtrl", function($scope) {
+    $scope.products = ["Milk", "Bread", "Cheese"];
+    $scope.addItem = function () {
+        $scope.errortext = "";
+        if (!$scope.addMe) {return;}
+        if ($scope.products.indexOf($scope.addMe) == -1) {
+            $scope.products.push($scope.addMe);
+        } else {
+            $scope.errortext = "The item is already in your shopping list.";
+        }
+    }
+    $scope.removeItem = function (x) {
+        $scope.errortext = "";    
+        $scope.products.splice(x, 1);
+    }
+});
+</script>
+
+<div ng-app="myShoppingList" ng-cloak ng-controller="myCtrl" class="w3-card-2 w3-margin" style="max-width:400px;">
+  <header class="w3-container w3-light-grey w3-padding-hor-16">
+    <h3>My Shopping List</h3>
+  </header>
+  <ul class="w3-ul">
+    <li ng-repeat="x in products" class="w3-padding-hor-16">{{x}}<span ng-click="removeItem($index)" style="cursor:pointer;" class="w3-right w3-margin-right">×</span></li>
+  </ul>
+  <div class="w3-container w3-light-grey w3-padding-hor-16">
+    <div class="w3-row w3-margin-top">
+      <div class="w3-col s10">
+        <input placeholder="Add shopping items here" ng-model="addMe" class="w3-input w3-border w3-padding">
+      </div>
+      <div class="w3-col s2">
+        <button ng-click="addItem()" class="w3-btn w3-padding w3-green">Add</button>
+      </div>
+    </div>
+    <p class="w3-padding-left w3-text-red">{{errortext}}</p>
+  </div>
+</div>
+
+</body>
+</html>
+
+
+example2.jsp
+------------
+
+<!DOCTYPE html>
+<html>
+<script src="js/angular.min.js"></script>
+<body>
+<div ng-app>
+<input type="text" ng-model="txtname" />
+Hello {{txtname}}
+</div>
+</body>
+</html>
+
+
+--------------------------------------------
+Json demo
+---------
+step 1: Build path, check for jdk & jre (order & import)
+
+step 2 : Folder arrangement
+
+src-main-java
+
+package com.json.conversion;
+
+public class Employee {
+	
+	private int age;
+    private String name;
+
+    public int getAge() {
+        return age;
+    }
+
+    public void setAge(int age) {
+        this.age = age;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+}
+
+
+web.xml
+
+-------
+
+   <dependency>
+<groupId>org.webjars</groupId>
+<artifactId>angular-ui-bootstrap</artifactId>
+<version>0.12.1-1</version>
+</dependency>
+    <dependency>
+<groupId>com.google.code.gson</groupId>
+<artifactId>gson</artifactId>
+<version>2.6.2</version>
+</dependency>
+ 
+ <build>
+    <finalName>Jackson</finalName>
+<resources>
+        <resource>
+            <directory>src/main/java</directory>
+            <includes>
+                <include>**</include>
+            </includes>
+            <excludes>
+                <exclude>**/*.java</exclude>
+            </excludes>
+        </resource>
+        <resource>
+            <directory>src/main/resources</directory>
+        </resource>
+    </resources>
+
+  </build>
+
+---------------------
+
+index.jsp
+
+
+<%@page import="java.util.List"%>
+<%@ page language="java" contentType="text/html; charset=ISO-8859-1" 
+
+pageEncoding="ISO-8859-1"%>
+<%@ page import="com.google.gson.Gson" %>
+<%@ page import="com.json.conversion.Employee" %>
+<%@ page import="java.util.ArrayList" %>
+<%
+    Employee obj1 = new Employee();
+    obj1.setAge(10);
+    obj1.setName("Ram");
+    Employee obj2 = new Employee();
+    obj2.setAge(20);
+    obj2.setName("Shyam");
+    Employee obj3 = new Employee();
+    obj3.setAge(30);
+    obj3.setName("Mohan");
+
+    List<Employee> al = new ArrayList<Employee>();
+    al.add(obj1);
+    al.add(obj2);
+    al.add(obj3);
+
+    Gson gson = new Gson();
+    String json = gson.toJson(al);
+%>
+
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-
+
+1">
+        <title>json creation</title>
+<body>
+        Your JSON String is as Response : <span id="jsonStr"> <%=json
+
+%></span><br>
+        </body>
+        </html>
+
+
+----------------------------------------------
+
+Projectname->build path ->config update path
+
+lib & order, export
+
+-------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ex
