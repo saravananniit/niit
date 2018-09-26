@@ -1,0 +1,313 @@
+1.  REST client demo
+
+
+Create a spring mvc application.
+
+asual define config and controller is now replaced to REST controller
+
+------------------------------------
+
+2. already we created back end services with jar.
+
+--------------------------------------
+
+3. REST clien we need to incorp.
+
+
+create lib folder
+
+web-inf/lib
+
+Add h2 and backendservices jar
+
+and build the path
+
+or
+
+Maven dependency to add the jar
+
+   <dependency>
+   <groupId>com.niit</groupId>
+  <artifactId>ItemBackend</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+  </dependency>
+  	
+
+
+
+------------------
+
+4.
+
+<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-orm</artifactId>
+			<version>5.0.5.RELEASE</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-context</artifactId>
+			<version>5.0.5.RELEASE</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+			<version>2.9.5</version>
+		</dependency>
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-entitymanager</artifactId>
+			<version>5.2.16.Final</version>
+		</dependency>
+<!-- https://mvnrepository.com/artifact/javax.servlet/javax.servlet-api -->
+<dependency>
+    <groupId>javax.servlet</groupId>
+    <artifactId>javax.servlet-api</artifactId>
+    <version>3.1.0</version>
+    <scope>provided</scope>
+</dependency>
+
+		<!-- https://mvnrepository.com/artifact/jstl/jstl -->
+<dependency>
+    <groupId>jstl</groupId>
+    <artifactId>jstl</artifactId>
+    <version>1.2</version>
+</dependency>
+		
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-dbcp2</artifactId>
+			<version>2.2.0</version>
+		</dependency>
+
+<dependency>
+   <groupId>com.h2database</groupId>
+   <artifactId>h2</artifactId>
+   <version>1.4.196</version>
+   <scope>test</scope>
+</dependency>
+  
+  
+  
+  <dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-web</artifactId>
+			<version>5.0.5.RELEASE</version>
+		</dependency>
+  	<dependency>
+    <groupId>com.niit</groupId>
+  <artifactId>ItemBackend</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+  </dependency>
+  	
+
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-webmvc</artifactId>
+			<version>5.0.5.RELEASE</version>
+		</dependency>
+    
+    <dependency>
+    <groupId>com.fasterxml.jackson.core</groupId>
+    <artifactId>jackson-databind</artifactId>
+    <version>2.9.5</version>
+    </dependency>
+
+--------------------------------------------
+5.
+
+
+package com.niit.ItemRest.config;
+
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.ViewResolver;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+import org.springframework.web.servlet.view.InternalResourceViewResolver;
+
+@Configuration
+@EnableWebMvc
+@ComponentScan(basePackages="com.niit")
+public class AppConfig {
+	
+	@Bean(name="viewResolver")
+	public ViewResolver getViewResolver() {
+		InternalResourceViewResolver viewResolver=new InternalResourceViewResolver();
+		viewResolver.setPrefix("/WEB-INF/views/");
+		viewResolver.setSuffix(".jsp");
+		
+		
+		return viewResolver;
+		
+	}
+
+
+}
+
+----------------------------------------------------------------
+
+6.
+
+package com.niit.ItemRest.config;
+
+
+import javax.servlet.ServletRegistration;
+
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.support.AbstractAnnotationConfigDispatcherServletInitializer;
+
+
+public class WebAppInitializer extends AbstractAnnotationConfigDispatcherServletInitializer {
+
+	@Override
+	protected Class<?>[] getRootConfigClasses() {
+		// TODO Auto-generated method stub
+	//	return null;
+		return new Class[] {AppConfig.class};
+	}
+
+	@Override
+	protected Class<?>[] getServletConfigClasses() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public void addCorsMappings(CorsRegistry registry) {
+        
+
+		registry.addMapping("/**");
+		    }
+
+	@Override
+	protected String[] getServletMappings() {
+		// TODO Auto-generated method stub
+		//return null;
+		return new String[] {"/"};
+	}
+
+	
+	@Override
+	protected void customizeRegistration(ServletRegistration.Dynamic registration)
+	{
+		registration.setInitParameter("dispatchOptionsRequest","true");
+		registration.setAsyncSupported(true);
+	}
+}
+--------------------------------------------------
+7.  // REST is not focused on UI
+
+
+put by default 
+
+
+index.jsp
+<html>
+<body>
+<h2>Hello World!</h2>
+</body>
+</html>
+
+
+---------------------------------------------------
+package com.niit.ItemRest.controller;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.niit.ItemBackend.model.*;
+import com.niit.ItemBackend.service.ItemService;
+
+
+import org.springframework.web.bind.annotation.RequestMapping;
+
+@RestController
+@RequestMapping("/api/item")
+@CrossOrigin(origins = "http://localhost:4200")
+public class ItemController {
+
+
+	@Autowired
+	private ItemService itemService; // DI
+	
+	
+	
+	@GetMapping
+	public List<Item> listAllItem() {
+		
+		  List<Item> item=itemService.findAllItems();//
+		//, HttpStatus.CREATED);
+		  return item;
+	}
+	
+	@GetMapping("/{itemId}")
+	public ResponseEntity<Item> getItem(@PathVariable("itemId") int itemId) {
+		
+		if(itemService.findItemById(itemId)!=null) {
+			return new ResponseEntity<Item>(itemService.findItemById(itemId),                                  HttpStatus.OK);
+		}
+		else 
+			return new ResponseEntity<Item>(HttpStatus.NOT_FOUND); 
+	}
+	
+	
+	
+	@DeleteMapping("/{itemId}")
+	public ResponseEntity<Void> deleteItem(@PathVariable("itemId") int itemId) {
+		
+		if(itemService.findItemById(itemId)!=null) {
+			itemService.deleteItem(itemId);
+			return new ResponseEntity<Void>(HttpStatus.OK);
+		}
+		else 
+			return new ResponseEntity<Void>(HttpStatus.NOT_FOUND); 
+	}
+	
+	@PostMapping
+	public ResponseEntity<Void> addItem(@RequestBody Item item) {
+		
+		if(itemService.findItemByName(item.getDescription())!=null) {
+			
+			return new ResponseEntity<Void>(HttpStatus.CONFLICT);
+		}
+		else {
+			itemService.addItem(item);
+			return new ResponseEntity<Void>(HttpStatus.CREATED);
+		}
+	}
+	
+	@PutMapping
+	public ResponseEntity<Void> updateItem(@RequestBody Item item) {
+		
+		if(itemService.findItemById(item.getItemId())!=null) {
+			itemService.updateItem(item);
+			return new ResponseEntity<Void>(HttpStatus.OK);
+		}
+		else {
+			
+			return new ResponseEntity<Void>(HttpStatus.NOT_FOUND);
+		}
+	}
+	
+	
+	
+}
+----------------------------------
+	   		
+

@@ -1,0 +1,209 @@
+package com.niit.ItemBackend.dao;
+
+import java.util.List;
+import com.niit.ItemBackend.model.*;
+
+public interface ItemDAO {
+
+	public List<Item> findAll();
+	public Item findById(int itemId);
+	public Item findByName(String itemname);
+	
+        public boolean addItem(Item item);
+	
+
+        public boolean updateItem(Item item);
+	
+        public boolean deleteItem(int itemId);
+
+	
+}
+------------------------------
+package com.niit.ItemBackend.dao;
+import java.util.List;
+
+import javax.transaction.Transactional;
+
+import org.hibernate.SessionFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+
+
+import com.niit.ItemBackend.model.Item;
+import com.niit.ItemBackend.model.*;;
+
+@Repository("itemDAO")
+@Transactional
+public class ItemImpl implements ItemDAO {
+
+	@Autowired
+	private SessionFactory sessionFactory;
+
+	
+	public List<Item> findAll() {
+		// TODO Auto-generated method stub
+		//return null;
+		return sessionFactory.getCurrentSession()
+				.createQuery("from Item")
+				.list();
+
+	
+	}
+
+	public Item findById(int itemId) {
+		// TODO Auto-generated method stub
+	//	return null;
+		return (Item)sessionFactory.getCurrentSession()
+				.createQuery("from Item where itemId="+itemId)
+				.uniqueResult();
+	
+	
+	}
+
+	public Item findByName(String itemname) {
+		// TODO Auto-generated method stub
+//		return null;
+		return (Item)sessionFactory.getCurrentSession()
+				.createQuery("from Item where description='"+itemname+"'")
+				.uniqueResult();
+	
+	
+	}
+
+	public boolean addItem(Item item) {
+		// TODO Auto-generated method stub
+		//return false;
+		sessionFactory.getCurrentSession().save(item);
+		return true;
+
+	
+	}
+
+	public boolean updateItem(Item item) {
+		// TODO Auto-generated method stub
+		//return false;
+		System.out.println("inside dao update");
+		sessionFactory.getCurrentSession().update(item);
+		return true;
+
+	
+	}
+
+	public boolean deleteItem(int itemId) {
+		// TODO Auto-generated method stub
+		//return false;
+		
+		sessionFactory.getCurrentSession().delete(findById(itemId));	
+		return true;
+
+	}
+
+}
+
+---------------------------------
+
+
+package com.niit.ItemBackend.service;
+
+import java.util.List;
+
+import com.niit.ItemBackend.model.Item;
+
+public interface ItemService {
+
+public List<Item> findAllItems();
+public Item findItemById(int itemId);
+public Item findItemByName(String itemName);
+
+
+public boolean addItem(Item item);
+
+public boolean updateItem(Item item);
+public boolean deleteItem(int itemId);
+
+}
+
+
+---------------------------------------
+
+package com.niit.ItemBackend.service;
+
+import java.util.List;
+import java.util.List;
+
+import javax.transaction.Transactional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+import org.springframework.stereotype.Service;
+
+import com.niit.ItemBackend.model.Item;
+import com.niit.ItemBackend.dao.*;;
+
+
+@Service
+@Repository("itemService")
+@Transactional
+public class ItemServiceImpl implements ItemService {
+
+public List<Item> findAllItems() {
+		// TODO Auto-generated method stub
+	//	return null;
+		return itemDAO.findAll();
+	
+	}
+
+	public Item findItemById(int itemId) {
+		// TODO Auto-generated method stub
+	//	return null;
+		return itemDAO.findById(itemId);
+	
+	}
+
+	public Item findItemByName(String itemName) {
+		// TODO Auto-generated method stub
+	//	return null;
+		return itemDAO.findByName(itemName);
+	}
+
+	public boolean addItem(Item item) {
+		// TODO Auto-generated method stub
+	//	return false;
+		if(itemDAO.findById(item.getItemId())!=null) {
+			return false;
+		}
+		else {
+			itemDAO.addItem(item);
+			return true;
+		}
+
+	}
+
+	public boolean updateItem(Item item) {
+		// TODO Auto-generated method stub
+	//	return false;
+	
+		System.out.println("inside update");
+	//	if(itemDAO.findById(item.getItemId())!=null) {	
+			itemDAO.updateItem(item);
+			return true;
+		
+	}
+
+	public boolean deleteItem(int itemId) {
+		// TODO Auto-generated method stub
+		//return false;
+		if(itemDAO.findById(itemId)!=null) {	
+			itemDAO.deleteItem(itemId);
+			return true;
+		}
+		else {
+			return false;
+		}
+
+	
+	}
+
+
+}
+-----------------------------------------------
