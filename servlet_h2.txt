@@ -1,0 +1,286 @@
+// Servlet with HB demo using H2 database
+
+0.
+
+install H2 db and identify the properties of driver, jdbc url, username and password.
+---------------------------------------------------------------------------------
+
+
+1. 
+
+create Maven -> Webapp archetype, give relevant group id and artifact id .
+
+JDK 8
+
+Targeted runtime -> Tomcat server
+
+please set java folder under src/main
+--------------------------------------
+
+2. maven dependencies
+
+pom.xml :
+
+<dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>3.8.1</version>
+      <scope>test</scope>
+</dependency>
+<dependency>
+    <groupId>com.h2database</groupId>
+    <artifactId>h2</artifactId>
+    <version>1.4.196</version>
+</dependency>
+    
+    <!-- https://mvnrepository.com/artifact/org.hibernate/hibernate-core -->
+<dependency>
+    <groupId>org.hibernate</groupId>
+    <artifactId>hibernate-core</artifactId>
+    <version>5.2.12.Final</version>
+</dependency>
+    <dependency>
+    <groupId>org.hibernate.validator</groupId>
+    <artifactId>hibernate-validator</artifactId>
+    <version>6.0.4.Final</version>
+</dependency>
+
+------------------------------
+
+3. 
+
+src/main/resources/
+
+Hibernate.cfg.xml :
+
+
+
+<?xml version="1.0" encoding="UTF-8"?>
+
+<hibernate-configuration>
+
+<session-factory>
+
+<property name="hbm2ddl.auto">update</property>
+
+<property name="hibernate.dialect">org.hibernate.dialect.H2Dialect</property>
+
+<property name="hibernate.connection.driver_class">org.h2.Driver</property>
+
+<property name="hibernate.connection.url">jdbc:h2:tcp://localhost/./sample/niit</property>
+<property name="hibernate.connection.username">sa</property>
+<property name="hibernate.connection.password">sa</property>
+
+<mapping class="Model.Employee"></mapping>
+
+</session-factory>
+
+</hibernate-configuration>
+
+-------------------------------------------
+4. 
+
+src/main/java
+
+
+package Model;
+
+
+import javax.persistence.*;
+
+@Entity
+@Table
+public class Employee101 {
+	
+	@Id
+	private int id;
+
+	public int getId() {
+		return id;
+	}
+	
+	//this is an model for database program
+	
+	public void setId(int id) {
+		this.id = id;
+	}
+	
+	public String getName() {
+		return name;
+	}
+	public void setName(String name) {
+		this.name = name;
+	}
+	
+	private String name;
+	
+	
+
+}
+----------------------------
+5. 
+
+src/main/webapp
+
+index. jsp
+
+<html>
+<body>
+
+<form action="serv1" method="post">
+
+Enter the Id here <input type="text" name="t1"/>
+<br/>
+Enter the password here <input type="text" name="t2"/>
+<br/>
+<input type="submit" value="press"/>
+
+</form>
+
+</body>
+</html>
+------------------------
+
+
+6. 
+
+src/main/java
+
+
+
+package Controller;
+
+import java.io.IOException;
+
+import javax.persistence.Query;
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.util.*;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
+import org.hibernate.cfg.Configuration;
+
+import Model.Employee;
+
+/**
+ * Servlet implementation class serv1
+ */
+public class serv1 extends HttpServlet {
+	private static final long serialVersionUID = 1L;
+       
+    /**
+     * @see HttpServlet#HttpServlet()
+     */
+    public serv1() {
+        super();
+        // TODO Auto-generated constructor stub
+    }
+
+	/**
+	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
+	 */
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		// TODO Auto-generated method stub
+
+		try
+		{
+		String id=request.getParameter("t1");
+		String name=request.getParameter("t2");
+		if(!(name.equals("")))
+				{
+			
+			Configuration config=new Configuration();
+			config.configure("Hibernate.cfg.xml");
+			SessionFactory sf=config.buildSessionFactory();
+			Session sess=sf.openSession();
+			
+			Transaction tran=sess.beginTransaction();
+			Employee emp=new Employee();
+			emp.setId(Integer.parseInt(id));
+			emp.setName(name);
+						sess.save(emp);
+			tran.commit();
+					
+            response.getWriter().append("Served at: ").append(request.getContextPath());
+            response.getWriter().append("done");
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            Query q=sess.createQuery("from Employee");
+				List<Employee>l=(List<Employee>)q.getResultList();
+				
+				for(Employee empl:l)
+				{
+					response.getWriter().append(empl.getName());
+					
+				}
+            
+				
+				}
+		else
+		{
+RequestDispatcher req= request.getRequestDispatcher("index.jsp");
+		
+				req.forward(request,response);
+		
+	}
+				}catch(Exception e)
+				{
+					e.printStackTrace();
+				}
+                  
+				}
+	
+
+	/**
+	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
+	 */
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		// TODO Auto-generated method stub
+		doGet(request, response);
+	}
+
+}
+-----------------------------------------------
+
+7. 
+
+web.xml
+
+
+<!DOCTYPE web-app PUBLIC
+ "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
+ "http://java.sun.com/dtd/web-app_2_3.dtd" >
+
+<web-app>
+  <display-name>Archetype Created Web Application</display-name>
+  <servlet>
+  	<servlet-name>serv1</servlet-name>
+  	<display-name>serv1</display-name>
+  	<description></description>
+  	<servlet-class>Controller.serv1</servlet-class>
+  </servlet>
+  <servlet-mapping>
+  	<servlet-name>serv1</servlet-name>
+  	<url-pattern>/serv1</url-pattern>
+  </servlet-mapping>
+</web-app>
+
+--------------------------------------------
