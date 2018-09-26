@@ -1,0 +1,214 @@
+0.
+
+create a maven project
+
+archetype : webapp
+
+set jdk 8
+
+add corresponding maven dependencies 
+
+set Targeted run time to map the server
+
+create java folder at src if required
+
+src/main/java
+
+---------------------------------------
+
+
+1.
+
+package model;
+
+public class User {
+
+	private String userName;
+
+	public String getUserName() {
+		return userName;
+	}
+
+	public void setUserName(String userName) {
+		this.userName = userName;
+	}
+
+	
+       }
+
+-------------------------------------------------
+
+2.
+
+package com.hello;
+
+import java.text.DateFormat;
+import java.util.Date;
+import java.util.Locale;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+
+import org.springframework.ui.ModelMap;
+import model.User;
+
+@Controller
+
+@RequestMapping("/")
+public class HelloController {
+
+
+	
+@RequestMapping(method = RequestMethod.GET)
+public String printHello(Locale locale, Model model)
+{
+	model.addAttribute("message", "Hello NIIT Spring MVC Framework!");
+
+	System.out.println("Home Page Requested, locale = " + locale);
+	
+        Date date = new Date();
+	
+DateFormat dateFormat = DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG,              locale);
+
+	String formattedDate = dateFormat.format(date);
+
+	model.addAttribute("serverTime", formattedDate);
+	
+	return "hello";
+}
+	
+
+
+@RequestMapping(value = "/user", method = RequestMethod.POST)
+public String user(@Validated User user, Model model) 
+{
+		System.out.println("User Page Requested");
+	
+		
+		model.addAttribute("userName", user.getUserName());
+		return "user";
+
+}
+
+	
+	
+}
+----------------------------------------------------------
+3. 
+
+web-inf/jsp
+
+hello.jsp
+
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<%@ page session="false"%>
+<html>
+<head>
+<title>Home</title>
+</head>
+<body>
+	<h1>Hello world!</h1>
+
+	<P>The time on the server is ${serverTime}.</P>
+	
+	
+	<p> ${message}</p>
+
+	
+         <form action="user" method="post">
+		<input type="text" name="userName"><br> <input
+			type="submit" value="Login">
+	</form>
+</body>
+</html>
+
+// controller method1 is called -> hello.jsp is loaded
+//contoller method2 is called -> form submit
+
+
+---------------------------------------------------------
+4.
+
+web-inf/jsp
+
+user.jsp
+
+
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>User Home Page</title>
+</head>
+<body>
+<h3>Hi user page ${userName}</h3>
+</body>
+</html>
+
+---------------------------------------------------
+5. config 
+
+web-inf/HelloWeb-servlet.xml
+
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns = "http://www.springframework.org/schema/beans"
+   xmlns:context = "http://www.springframework.org/schema/context"
+   xmlns:xsi = "http://www.w3.org/2001/XMLSchema-instance"
+   xsi:schemaLocation = "http://www.springframework.org/schema/beans     
+   http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+   http://www.springframework.org/schema/context 
+   http://www.springframework.org/schema/context/spring-context-3.0.xsd">
+
+    
+    
+   <context:component-scan base-package = "com.hello" />
+
+   <bean class = "org.springframework.web.servlet.view.InternalResourceViewResolver">
+      <property name = "prefix" value = "/WEB-INF/jsp/" />
+      <property name = "suffix" value = ".jsp" />
+   </bean>
+
+</beans>
+
+----------------------------
+
+6. config
+
+web.xml
+
+
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://java.sun.com/xml/ns/javaee" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd" id="WebApp_ID" version="3.0">
+
+<display-name>Archetype Created Web Application</display-name>
+    
+    
+    
+   <servlet>
+      <servlet-name>HelloWeb</servlet-name>
+      <servlet-class>
+         org.springframework.web.servlet.DispatcherServlet
+      </servlet-class>
+       <init-param>
+       		<param-name>contextConfigLocation</param-name>
+       		<param-value>/WEB-INF/HelloWeb-servlet.xml</param-value>
+    		</init-param>
+      
+      <load-on-startup>1</load-on-startup>
+   </servlet>
+
+   <servlet-mapping>
+      <servlet-name>HelloWeb</servlet-name>
+      <url-pattern>/</url-pattern>
+   </servlet-mapping>
+ 
+</web-app>
+    
+--------------------------------------
