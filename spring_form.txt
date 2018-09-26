@@ -1,0 +1,284 @@
+Demo : Spring form
+------------------
+
+package com.niit.cruddemo.controller;
+	
+	import org.springframework.beans.factory.annotation.Autowired;
+	import org.springframework.stereotype.Controller;
+	import org.springframework.ui.Model;
+	import org.springframework.web.bind.annotation.GetMapping;
+	import org.springframework.web.bind.annotation.ModelAttribute;
+	import org.springframework.web.bind.annotation.PathVariable;
+	import org.springframework.web.bind.annotation.PostMapping;
+	
+
+	import com.niit.SkillmapperBackend.service.*;
+	import com.niit.SkillmapperBackend.model.*;
+	//import com.niit.cruddemo.service.EmployeeService;
+	
+	
+	@Controller
+	public class EmployeeController {
+	
+	@Autowired
+	private EmployeeService employeeService;
+	
+	@GetMapping("/")
+	public String listEmployees(Model model) {
+	model.addAttribute("employee",new Employee());
+	model.addAttribute("employees",employeeService.findAllEmployees());
+	
+	return "Employee";
+	
+	}
+	
+	@PostMapping("/employee/add")
+	public String addEmployee(@ModelAttribute("employee") Employee employee) {
+	
+	if(employee.getEmpid()==0) {
+	employeeService.addEmployee(employee);
+	}
+	else {
+	employeeService.updateEmployee(employee);
+	}
+	
+	return "redirect:/";
+	}
+	
+	@GetMapping("/remove/{id}")
+	public String removeEmployee(@PathVariable("id") int id){
+	
+	System.out.println("inside remove method");
+	employeeService.deleteEmployee(id);
+	return "redirect:/";
+	}
+	
+	@GetMapping("/edit/{id}")
+	public String editEmployee(@PathVariable("id") int id, Model model){
+	model.addAttribute("employee", employeeService.findEmployeesById(id));
+	model.addAttribute("employees",employeeService.findAllEmployees());
+	return "Employee";
+	}
+	
+	}
+
+----------------------------------
+
+
+package com.niit.springwebexample.config;
+	
+
+	import org.springframework.context.annotation.Bean;
+	import org.springframework.context.annotation.ComponentScan;
+	import org.springframework.context.annotation.Configuration;
+	import org.springframework.web.servlet.ViewResolver;
+	import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+	import org.springframework.web.servlet.view.InternalResourceViewResolver;
+	
+
+	
+
+	@Configuration
+	@EnableWebMvc
+	@ComponentScan(basePackages="com.niit")
+	public class AppConfig {
+		
+		@Bean(name="viewResolver")
+		public ViewResolver getViewResolver() {
+			InternalResourceViewResolver viewResolver=new InternalResourceViewResolver();
+			viewResolver.setPrefix("/WEB-INF/views/");
+			viewResolver.setSuffix(".jsp");
+			
+			return viewResolver;
+			
+		}
+}
+--------------------------------
+
+package com.niit.springwebexample.config;
+	
+
+	import org.springframework.web.servlet.support.AbstractAnnotationConfigDispatcherServletInitializer;
+	
+
+	public class WebAppInitializer extends AbstractAnnotationConfigDispatcherServletInitializer{
+	
+
+		@Override
+		protected Class<?>[] getRootConfigClasses() {
+			// TODO Auto-generated method stub
+			return new Class[] {AppConfig.class};
+		}
+	
+
+		@Override
+		protected Class<?>[] getServletConfigClasses() {
+			// TODO Auto-generated method stub
+			return null;
+		}
+	
+
+		@Override
+		protected String[] getServletMappings() {
+			// TODO Auto-generated method stub
+			return new String[] {"/"};
+		}
+	
+
+	}
+
+----------------------------------------
+web-inf/lib
+
+include necessary jar -> backend service and h2
+----------------------------------------
+
+web-inf/views
+
+Employee.jsp
+
+
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+	<%@ taglib uri="http://www.springframework.org/tags" prefix="spring" %>
+	<%@ taglib uri="http://www.springframework.org/tags/form" prefix="form" %>
+	<%@ page session="false" isELIgnored="false"%>
+	<html>
+	<head>
+	<title>Employee Page</title>
+	<style type="text/css">
+	.tg {border-collapse:collapse;border-spacing:0;border-color:#ccc;}
+	.tg td{font-family:Arial, sans-serif;font-size:14px;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;border-color:#ccc;color:#333;background-color:#fff;}
+	.tg th{font-family:Arial, sans-serif;font-size:14px;font-weight:normal;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;border-color:#ccc;color:#333;background-color:#f0f0f0;}
+	.tg .tg-4eph{background-color:#f9f9f9}
+	</style>
+	</head>
+	<body>
+	<h1>
+	Add an Employee
+	</h1>
+	
+	<c:url var="addAction" value="/employee/add" ></c:url>
+	
+	<form:form action="${addAction}" modelAttribute="employee">
+	<table>
+	<tr>
+	<td>
+	<form:label path="empid">
+	<spring:message text="empId"/>
+	</form:label>
+	</td>
+	<td>
+	<form:input path="empid"  size="8"  />
+	</td> 
+	</tr>
+	<tr>
+	<td>
+	<form:label path="name">
+	<spring:message text="Name"/>
+	</form:label>
+	</td>
+	<td>
+	<form:input path="name" />
+	</td> 
+	</tr>
+	<tr>
+	<td>
+	<form:label path="email">
+	<spring:message text="Email"/>
+	</form:label>
+	</td>
+	<td>
+	<form:input path="email" />
+	</td>
+	</tr>
+	<tr>
+	<td colspan="2">
+	<c:if test="${!empty employee.name}">
+	<input type="submit"
+	value="<spring:message text="Edit Employee"/>" />
+	</c:if>
+	<c:if test="${empty employee.name}">
+	<input type="submit"
+	value="<spring:message text="Add Employee"/>" />
+	</c:if>
+	</td>
+	</tr>
+	</table> 
+	</form:form>
+	<br>
+	<h3>Employees List</h3>
+	<c:if test="${!empty employees}">
+	<table class="tg">
+	<tr>
+	<th width="80">Employee ID</th>
+	<th width="120">Employee Name</th>
+	<th width="120">Employee Email</th>
+	<th width="60">Edit</th>
+	<th width="60">Delete</th>
+	</tr>
+	<c:forEach items="${employees}" var="employee">
+	<tr>
+	<td>${employee.empid}</td>
+	<td>${employee.name}</td>
+	<td>${employee.email}</td>
+	<td><a href="<c:url value='/edit/${employee.empid}' />" >Edit</a></td>
+	<td><a href="<c:url value='/remove/${employee.empid}' />" >Delete</a></td>
+	</tr>
+	</c:forEach>
+	</table>
+	</c:if>
+	</body>
+	</html>
+--------------------------------------------------
+
+
+    <dependency>
+    	<groupId>org.springframework</groupId>
+    	<artifactId>spring-web</artifactId>
+    	<version>5.0.5.RELEASE</version>
+    </dependency>
+    <dependency>
+    	<groupId>org.springframework</groupId>
+    	<artifactId>spring-webmvc</artifactId>
+    	<version>5.0.5.RELEASE</version>
+    </dependency>
+    <dependency>
+    	<groupId>jstl</groupId>
+    	<artifactId>jstl</artifactId>
+    	<version>1.2</version>
+    </dependency>
+    <dependency>
+    	<groupId>com.h2database</groupId>
+    	<artifactId>h2</artifactId>
+    	<version>1.4.196</version>
+    </dependency>
+    <dependency>
+    	<groupId>org.apache.commons</groupId>
+    	<artifactId>commons-dbcp2</artifactId>
+    	<version>2.2.0</version>
+    </dependency>
+    <dependency>
+    	<groupId>javax.servlet</groupId>
+    	<artifactId>servlet-api</artifactId>
+    	<version>2.5</version>
+    </dependency>
+    <dependency>
+    	<groupId>org.hibernate</groupId>
+    	<artifactId>hibernate-entitymanager</artifactId>
+    	<version>5.2.16.Final</version>
+    </dependency>
+    <dependency>
+    	<groupId>org.springframework</groupId>
+    	<artifactId>spring-context</artifactId>
+    	<version>5.0.5.RELEASE</version>
+    </dependency>
+    <dependency>
+    	<groupId>org.springframework</groupId>
+    	<artifactId>spring-orm</artifactId>
+    	<version>5.0.5.RELEASE</version>
+    </dependency>
+---------------------------------------
+
+
+
+
